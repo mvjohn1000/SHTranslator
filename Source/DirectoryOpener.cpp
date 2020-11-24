@@ -129,7 +129,7 @@ void DirectoryOpener::showWindow()
             while (fir > 1)
             {
                 sec = wholeFile.indexOf(fir,")");
-                String fetched =  wholeFile.substring(fir + 7, sec - 1);
+                String fetched =  wholeFile.substring(fir + 6, sec );
                 if (!data.contains(fetched))
                 {
                    data.add(fetched);
@@ -152,10 +152,10 @@ void DirectoryOpener::showWindow()
         {
             f.replaceWithText("");
         }
-                    
+
         for (int a= 0; a < data.size(); a++  )
         {
-            f.appendText(data[a] + "\n");
+            f.appendText(data[a] +  " = " + data[a] +"\n");
         }
         });
 }
