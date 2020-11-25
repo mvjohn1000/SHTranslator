@@ -44,6 +44,7 @@ public:
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     void showWindow();
+    void openFile();
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -59,6 +60,7 @@ private:
 
     //==============================================================================
     std::unique_ptr<TextButton> dialogOpe;
+    std::unique_ptr<TextButton> dialogFile;
 
 
     //==============================================================================

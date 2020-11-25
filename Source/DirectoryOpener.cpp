@@ -34,10 +34,17 @@ DirectoryOpener::DirectoryOpener ()
 
     dialogOpe.reset (new TextButton ("dialogOpe"));
     addAndMakeVisible (dialogOpe.get());
-    dialogOpe->setButtonText (TRANS("Open Folder"));
+    dialogOpe->setButtonText (TRANS("Open Folder - create new file"));
     dialogOpe->addListener (this);
 
-    dialogOpe->setBounds (112, 184, 150, 24);
+    dialogOpe->setBounds (112, 184, 176, 48);
+
+    dialogFile.reset (new TextButton ("dialogFile"));
+    addAndMakeVisible (dialogFile.get());
+    dialogFile->setButtonText (TRANS("Open File - append"));
+    dialogFile->addListener (this);
+
+    dialogFile->setBounds (112, 296, 168, 40);
 
 
     //[UserPreSize]
@@ -56,6 +63,7 @@ DirectoryOpener::~DirectoryOpener()
     //[/Destructor_pre]
 
     dialogOpe = nullptr;
+    dialogFile = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -94,6 +102,12 @@ void DirectoryOpener::buttonClicked (Button* buttonThatWasClicked)
         showWindow();
         //[/UserButtonCode_dialogOpe]
     }
+    else if (buttonThatWasClicked == dialogFile.get())
+    {
+        //[UserButtonCode_dialogFile] -- add your button handler code here..
+        openFile();
+        //[/UserButtonCode_dialogFile]
+    }
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
@@ -103,6 +117,65 @@ void DirectoryOpener::buttonClicked (Button* buttonThatWasClicked)
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
+
+void DirectoryOpener::openFile()
+{
+    FileChooser myChooser ("Please select the file you want to load...",
+                           File::getCurrentWorkingDirectory(),
+                           "*.h, *.cpp");
+
+    if (myChooser.browseForFileToOpen())
+    {
+        int fir = 0, sec = 0;
+        StringArray data,tempData;
+        data.clear();
+        tempData.clear();
+        File ourFile (myChooser.getResult());
+        String wholeFile;
+        wholeFile.clear();
+        wholeFile = ourFile.loadFileAsString();
+        fir = wholeFile.indexOf("TRANS(");
+        while (fir > 1)
+        {
+            sec = wholeFile.indexOf(fir,")");
+            String fetched =  wholeFile.substring(fir + 6, sec );
+            if (!data.contains(fetched))
+            {
+               data.add(fetched +  " = " + fetched);
+            }
+            fir = wholeFile.indexOf(sec, "TRANS(");
+        }
+        File f = juce::File::getCurrentWorkingDirectory().getChildFile("stringData.txt");
+        if( !f.existsAsFile() )
+        {
+            auto result = f.create();
+            if( !result.wasOk() )
+            {
+                DBG( "failed creating file!" );
+                jassertfalse; //pause so we can see the error message
+                return;  //bail
+            }
+        }
+        else
+        {
+            String wholeFile = f.loadFileAsString();
+            tempData.addLines(wholeFile);
+            for (int a= 0; a < tempData.size(); a++)
+            {
+                if (!data.contains(tempData[a]))
+                {
+                   data.add(tempData[a]);
+                }
+            }
+
+           f.replaceWithText("");
+        }
+        for (int a= 0; a < data.size(); a++  )
+        {
+            f.appendText(data[a] +"\n");
+        }
+    }
+}
 void DirectoryOpener::showWindow()
 {
     String nameStr;
@@ -179,7 +252,10 @@ BEGIN_JUCER_METADATA
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ff323e44"/>
   <TEXTBUTTON name="dialogOpe" id="90f1171ac39300ad" memberName="dialogOpe"
-              virtualName="" explicitFocusOrder="0" pos="112 184 150 24" buttonText="Open Folder"
+              virtualName="" explicitFocusOrder="0" pos="112 184 176 48" buttonText="Open Folder - create new file"
+              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
+  <TEXTBUTTON name="dialogFile" id="c36db67eb724c77f" memberName="dialogFile"
+              virtualName="" explicitFocusOrder="0" pos="112 296 168 40" buttonText="Open File - append"
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 
