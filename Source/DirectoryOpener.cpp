@@ -32,19 +32,72 @@ DirectoryOpener::DirectoryOpener ()
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
 
-    dialogOpe.reset (new TextButton ("dialogOpe"));
-    addAndMakeVisible (dialogOpe.get());
-    dialogOpe->setButtonText (TRANS("Open Folder - create new file"));
-    dialogOpe->addListener (this);
+    label.reset (new Label ("new label",
+                            TRANS("Input File")));
+    addAndMakeVisible (label.get());
+    label->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label->setJustificationType (Justification::centredLeft);
+    label->setEditable (false, false, false);
+    label->setColour (TextEditor::textColourId, Colours::black);
+    label->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    dialogOpe->setBounds (112, 184, 176, 48);
+    label->setBounds (26, 24, 80, 24);
 
-    dialogFile.reset (new TextButton ("dialogFile"));
-    addAndMakeVisible (dialogFile.get());
-    dialogFile->setButtonText (TRANS("Open File - append"));
-    dialogFile->addListener (this);
+    fileBrowse.reset (new TextButton ("fileBrowse"));
+    addAndMakeVisible (fileBrowse.get());
+    fileBrowse->setButtonText (TRANS("Browse"));
+    fileBrowse->addListener (this);
 
-    dialogFile->setBounds (112, 296, 168, 40);
+    fileBrowse->setBounds (32, 96, 150, 24);
+
+    filePath.reset (new TextEditor ("filePath"));
+    addAndMakeVisible (filePath.get());
+    filePath->setMultiLine (false);
+    filePath->setReturnKeyStartsNewLine (false);
+    filePath->setReadOnly (false);
+    filePath->setScrollbarsShown (true);
+    filePath->setCaretVisible (true);
+    filePath->setPopupMenuEnabled (true);
+    filePath->setText (String());
+
+    filePath->setBounds (32, 56, 416, 24);
+
+    label2.reset (new Label ("new label",
+                             TRANS("Folder to Process")));
+    addAndMakeVisible (label2.get());
+    label2->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label2->setJustificationType (Justification::centredLeft);
+    label2->setEditable (false, false, false);
+    label2->setColour (TextEditor::textColourId, Colours::black);
+    label2->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+
+    label2->setBounds (32, 160, 150, 24);
+
+    folderPath.reset (new TextEditor ("folderPath"));
+    addAndMakeVisible (folderPath.get());
+    folderPath->setMultiLine (false);
+    folderPath->setReturnKeyStartsNewLine (false);
+    folderPath->setReadOnly (false);
+    folderPath->setScrollbarsShown (true);
+    folderPath->setCaretVisible (true);
+    folderPath->setPopupMenuEnabled (true);
+    folderPath->setText (String());
+
+    folderPath->setBounds (32, 192, 408, 24);
+
+    folderBrowse.reset (new TextButton ("folderBrowse"));
+    addAndMakeVisible (folderBrowse.get());
+    folderBrowse->setButtonText (TRANS("Browse"));
+    folderBrowse->addListener (this);
+
+    folderBrowse->setBounds (32, 240, 150, 24);
+
+    btnProcess.reset (new TextButton ("btnProcess"));
+    addAndMakeVisible (btnProcess.get());
+    btnProcess->setButtonText (TRANS("Process"));
+    btnProcess->addListener (this);
+
+    btnProcess->setBounds (32, 296, 150, 24);
 
 
     //[UserPreSize]
@@ -62,8 +115,13 @@ DirectoryOpener::~DirectoryOpener()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    dialogOpe = nullptr;
-    dialogFile = nullptr;
+    label = nullptr;
+    fileBrowse = nullptr;
+    filePath = nullptr;
+    label2 = nullptr;
+    folderPath = nullptr;
+    folderBrowse = nullptr;
+    btnProcess = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -96,17 +154,23 @@ void DirectoryOpener::buttonClicked (Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == dialogOpe.get())
+    if (buttonThatWasClicked == fileBrowse.get())
     {
-        //[UserButtonCode_dialogOpe] -- add your button handler code here..
-        showWindow();
-        //[/UserButtonCode_dialogOpe]
+        //[UserButtonCode_fileBrowse] -- add your button handler code here..
+        fileBrowser();
+        //[/UserButtonCode_fileBrowse]
     }
-    else if (buttonThatWasClicked == dialogFile.get())
+    else if (buttonThatWasClicked == folderBrowse.get())
     {
-        //[UserButtonCode_dialogFile] -- add your button handler code here..
-        openFile();
-        //[/UserButtonCode_dialogFile]
+        //[UserButtonCode_folderBrowse] -- add your button handler code here..
+        folderBrowser();
+        //[/UserButtonCode_folderBrowse]
+    }
+    else if (buttonThatWasClicked == btnProcess.get())
+    {
+        //[UserButtonCode_btnProcess] -- add your button handler code here..
+        process();
+        //[/UserButtonCode_btnProcess]
     }
 
     //[UserbuttonClicked_Post]
@@ -117,23 +181,107 @@ void DirectoryOpener::buttonClicked (Button* buttonThatWasClicked)
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
-
-void DirectoryOpener::openFile()
+void DirectoryOpener::folderBrowser()
+{
+    FileChooser myChooser("Choose a directory...",File::getCurrentWorkingDirectory(),"*",
+    true);
+    if (myChooser.browseForDirectory())
+    {
+        auto result = myChooser.getURLResult();
+        folderPathStr = result.isLocalFile() ? result.getLocalFile().getFullPathName()
+                                                        : result.toString (true);
+        folderPath->setText (folderPathStr);
+    }
+}
+void DirectoryOpener::fileBrowser()
 {
     FileChooser myChooser ("Please select the file you want to load...",
-                           File::getCurrentWorkingDirectory(),
-                           "*.h, *.cpp");
-
+    File::getCurrentWorkingDirectory(),
+    "*.h, *.cpp");
     if (myChooser.browseForFileToOpen())
     {
-        int fir = 0, sec = 0;
-        StringArray data,tempData;
-        data.clear();
-        tempData.clear();
         File ourFile (myChooser.getResult());
-        String wholeFile;
-        wholeFile.clear();
-        wholeFile = ourFile.loadFileAsString();
+        filePathStr = ourFile.getFullPathName();
+        filePath->setText (filePathStr);
+    }
+}
+
+void DirectoryOpener::process()
+{
+    if (filePathStr.isNotEmpty())
+    {
+      processFile();
+    }
+    if (folderPathStr.isNotEmpty())
+    {
+        processFolder();
+    }
+
+}
+
+void DirectoryOpener::processFile()
+{
+    int fir = 0, sec = 0;
+    StringArray data,tempData;
+    data.clear();
+    tempData.clear();
+    File ourFile (filePathStr);
+    String wholeFile;
+    wholeFile.clear();
+    wholeFile = ourFile.loadFileAsString();
+    fir = wholeFile.indexOf("TRANS(");
+    while (fir > 1)
+    {
+        sec = wholeFile.indexOf(fir,")");
+        String fetched =  wholeFile.substring(fir + 6, sec );
+        if (!data.contains(fetched))
+        {
+           data.add(fetched +  " = " + fetched);
+        }
+        fir = wholeFile.indexOf(sec, "TRANS(");
+    }
+    File f = juce::File::getCurrentWorkingDirectory().getChildFile("stringData.txt");
+    if( !f.existsAsFile() )
+    {
+        auto result = f.create();
+        if( !result.wasOk() )
+        {
+            DBG( "failed creating file!" );
+            jassertfalse; //pause so we can see the error message
+            return;  //bail
+        }
+    }
+    else
+    {
+        String wholeFile = f.loadFileAsString();
+        tempData.addLines(wholeFile);
+        for (int a= 0; a < tempData.size(); a++)
+        {
+            if (!data.contains(tempData[a]))
+            {
+               data.add(tempData[a]);
+            }
+        }
+
+       f.replaceWithText("");
+    }
+    for (int a= 0; a < data.size(); a++  )
+    {
+        f.appendText(data[a] +"\n");
+    }
+
+}
+void DirectoryOpener::processFolder()
+{
+    StringArray data,tempData;
+    data.clear();
+    tempData.clear();
+    juce::DirectoryIterator itr(folderPathStr, true,"*.cpp, *.h");
+    while (itr.next())
+    {
+        int fir = 0, sec = 0;
+        File theFileItFound (itr.getFile());
+        String wholeFile = theFileItFound.loadFileAsString();
         fir = wholeFile.indexOf("TRANS(");
         while (fir > 1)
         {
@@ -141,98 +289,44 @@ void DirectoryOpener::openFile()
             String fetched =  wholeFile.substring(fir + 6, sec );
             if (!data.contains(fetched))
             {
-               data.add(fetched +  " = " + fetched);
+            data.add(fetched +  " = " + fetched);
             }
             fir = wholeFile.indexOf(sec, "TRANS(");
         }
-        File f = juce::File::getCurrentWorkingDirectory().getChildFile("stringData.txt");
-        if( !f.existsAsFile() )
-        {
-            auto result = f.create();
-            if( !result.wasOk() )
-            {
-                DBG( "failed creating file!" );
-                jassertfalse; //pause so we can see the error message
-                return;  //bail
-            }
-        }
-        else
-        {
-            String wholeFile = f.loadFileAsString();
-            tempData.addLines(wholeFile);
-            for (int a= 0; a < tempData.size(); a++)
-            {
-                if (!data.contains(tempData[a]))
-                {
-                   data.add(tempData[a]);
-                }
-            }
 
-           f.replaceWithText("");
-        }
-        for (int a= 0; a < data.size(); a++  )
+    }
+    File f = juce::File::getCurrentWorkingDirectory() .getChildFile ("stringData.txt");
+    if( !f.existsAsFile() )
+    {
+        auto result = f.create();
+        if( !result.wasOk() )
         {
-            f.appendText(data[a] +"\n");
+            DBG( "failed creating file!" );
+            jassertfalse; //pause so we can see the error message
+            return;  //bail
         }
     }
-}
-void DirectoryOpener::showWindow()
-{
-    String nameStr;
-    fc.reset (new FileChooser ("Choose a directory...",
-                                           File::getCurrentWorkingDirectory(),
-                                           "*",
-                                           true));
-
-    fc->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories,
-     [] (const FileChooser& chooser)
+    else
     {
-         auto result = chooser.getURLResult();
-         auto name = result.isLocalFile() ? result.getLocalFile().getFullPathName()
-                                          : result.toString (true);
-        StringArray data;
-        data.clear();
-        juce::DirectoryIterator itr(name, true,"*.cpp, *.h");
-        while (itr.next())
-        {
-            int fir = 0, sec = 0;
-            File theFileItFound (itr.getFile());
-            String wholeFile = theFileItFound.loadFileAsString();
-            fir = wholeFile.indexOf("TRANS(");
-            while (fir > 1)
-            {
-                sec = wholeFile.indexOf(fir,")");
-                String fetched =  wholeFile.substring(fir + 6, sec );
-                if (!data.contains(fetched))
-                {
-                   data.add(fetched);
-                }
-                fir = wholeFile.indexOf(sec, "TRANS(");
-            }
+        String wholeFile = f.loadFileAsString();
+         tempData.addLines(wholeFile);
+         for (int a= 0; a < tempData.size(); a++)
+         {
+             if (!data.contains(tempData[a]))
+             {
+                data.add(tempData[a]);
+             }
          }
-        File f = juce::File::getCurrentWorkingDirectory() .getChildFile ("stringData.txt");
-        if( !f.existsAsFile() )
-        {
-            auto result = f.create();
-            if( !result.wasOk() )
-            {
-                DBG( "failed creating file!" );
-                jassertfalse; //pause so we can see the error message
-                return;  //bail
-            }
-        }
-        else
-        {
-            f.replaceWithText("");
-        }
 
-        for (int a= 0; a < data.size(); a++  )
-        {
-            f.appendText(data[a] +  " = " + data[a] +"\n");
-        }
-        });
+        f.replaceWithText("");
+    }
+    for (int a= 0; a < data.size(); a++  )
+    {
+
+        f.appendText(data[a] +"\n");
+    }
+
 }
-
 
 //[/MiscUserCode]
 
@@ -251,11 +345,31 @@ BEGIN_JUCER_METADATA
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ff323e44"/>
-  <TEXTBUTTON name="dialogOpe" id="90f1171ac39300ad" memberName="dialogOpe"
-              virtualName="" explicitFocusOrder="0" pos="112 184 176 48" buttonText="Open Folder - create new file"
+  <LABEL name="new label" id="ae6304902a0d0a15" memberName="label" virtualName=""
+         explicitFocusOrder="0" pos="26 24 80 24" edTextCol="ff000000"
+         edBkgCol="0" labelText="Input File" editableSingleClick="0" editableDoubleClick="0"
+         focusDiscardsChanges="0" fontname="Default font" fontsize="15.0"
+         kerning="0.0" bold="0" italic="0" justification="33"/>
+  <TEXTBUTTON name="fileBrowse" id="8178dc14ae8cf506" memberName="fileBrowse"
+              virtualName="" explicitFocusOrder="0" pos="32 96 150 24" buttonText="Browse"
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
-  <TEXTBUTTON name="dialogFile" id="c36db67eb724c77f" memberName="dialogFile"
-              virtualName="" explicitFocusOrder="0" pos="112 296 168 40" buttonText="Open File - append"
+  <TEXTEDITOR name="filePath" id="1950047376058bda" memberName="filePath" virtualName=""
+              explicitFocusOrder="0" pos="32 56 416 24" initialText="" multiline="0"
+              retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
+  <LABEL name="new label" id="c3d30e54c478b91d" memberName="label2" virtualName=""
+         explicitFocusOrder="0" pos="32 160 150 24" edTextCol="ff000000"
+         edBkgCol="0" labelText="Folder to Process" editableSingleClick="0"
+         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
+         fontsize="15.0" kerning="0.0" bold="0" italic="0" justification="33"/>
+  <TEXTEDITOR name="folderPath" id="61e01c3abafb8ba4" memberName="folderPath"
+              virtualName="" explicitFocusOrder="0" pos="32 192 408 24" initialText=""
+              multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="1"
+              caret="1" popupmenu="1"/>
+  <TEXTBUTTON name="folderBrowse" id="30caf8f36f6a13a" memberName="folderBrowse"
+              virtualName="" explicitFocusOrder="0" pos="32 240 150 24" buttonText="Browse"
+              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
+  <TEXTBUTTON name="btnProcess" id="c3c9bb914095809" memberName="btnProcess"
+              virtualName="" explicitFocusOrder="0" pos="32 296 150 24" buttonText="Process"
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 

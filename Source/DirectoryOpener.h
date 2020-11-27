@@ -43,8 +43,13 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-    void showWindow();
-    void openFile();
+
+    void fileBrowser();
+    void folderBrowser();
+    void process();
+    void processFile();
+    void processFolder();
+
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -55,12 +60,17 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-     std::unique_ptr<FileChooser> fc;
+    String filePathStr, folderPathStr;
     //[/UserVariables]
 
     //==============================================================================
-    std::unique_ptr<TextButton> dialogOpe;
-    std::unique_ptr<TextButton> dialogFile;
+    std::unique_ptr<Label> label;
+    std::unique_ptr<TextButton> fileBrowse;
+    std::unique_ptr<TextEditor> filePath;
+    std::unique_ptr<Label> label2;
+    std::unique_ptr<TextEditor> folderPath;
+    std::unique_ptr<TextButton> folderBrowse;
+    std::unique_ptr<TextButton> btnProcess;
 
 
     //==============================================================================
