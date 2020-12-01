@@ -183,7 +183,7 @@ void DirectoryOpener::buttonClicked (Button* buttonThatWasClicked)
 
 void DirectoryOpener::folderBrowser()
 {
-    FileChooser myChooser("Choose a directory...",File::getCurrentWorkingDirectory(),"*",
+    FileChooser myChooser("Choose a directory...",File::getCurrentWorkingDirectory(),"*.cpp,*.txt,*.h",
     true);
     if (myChooser.browseForDirectory())
     {
@@ -197,7 +197,7 @@ void DirectoryOpener::fileBrowser()
 {
     FileChooser myChooser ("Please select the file you want to load...",
     File::getCurrentWorkingDirectory(),
-    "*.h, *.cpp");
+    "*.cpp,*.txt,*.h");
     if (myChooser.browseForFileToOpen())
     {
         File ourFile (myChooser.getResult());
@@ -234,7 +234,7 @@ void DirectoryOpener::processFile()
     {
         sec = wholeFile.indexOf(fir,")");
         String fetched =  wholeFile.substring(fir + 6, sec );
-        if (!data.contains(fetched))
+        if (!data.contains(fetched +  " = " + fetched))
         {
            data.add(fetched +  " = " + fetched);
         }
@@ -276,7 +276,7 @@ void DirectoryOpener::processFolder()
     StringArray data,tempData;
     data.clear();
     tempData.clear();
-    juce::DirectoryIterator itr(folderPathStr, true,"*.cpp, *.h");
+    juce::DirectoryIterator itr(folderPathStr, true,"*.cpp, *.h, *.txt");
     while (itr.next())
     {
         int fir = 0, sec = 0;
@@ -287,7 +287,7 @@ void DirectoryOpener::processFolder()
         {
             sec = wholeFile.indexOf(fir,")");
             String fetched =  wholeFile.substring(fir + 6, sec );
-            if (!data.contains(fetched))
+            if (!data.contains(fetched +  " = " + fetched))
             {
             data.add(fetched +  " = " + fetched);
             }
