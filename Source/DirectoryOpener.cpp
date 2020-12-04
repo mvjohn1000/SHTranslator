@@ -257,13 +257,13 @@ void DirectoryOpener::processFile()
         tempData.addLines(wholeFile);
         for (int a= 0; a < tempData.size(); a++)
         {
-            if (!data.contains(tempData[a]))
+            if (data.contains(tempData[a]))
             {
-               data.add(tempData[a]);
+               data.removeString(tempData[a]);
+            
             }
         }
 
-       f.replaceWithText("");
     }
     for (int a= 0; a < data.size(); a++  )
     {
@@ -312,13 +312,14 @@ void DirectoryOpener::processFolder()
          tempData.addLines(wholeFile);
          for (int a= 0; a < tempData.size(); a++)
          {
-             if (!data.contains(tempData[a]))
+
+             if (data.contains(tempData[a]))
              {
-                data.add(tempData[a]);
+                data.removeString(tempData[a]);
+             
              }
          }
 
-        f.replaceWithText("");
     }
     for (int a= 0; a < data.size(); a++  )
     {
